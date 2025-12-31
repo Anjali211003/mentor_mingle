@@ -21,3 +21,18 @@ app.include_router(user_router, prefix="/api", tags=["users"])
 app.include_router(coach_router, prefix="/api", tags=["coach"])
 app.include_router(coachee_router, prefix="/api", tags=["coachee"])
 app.include_router(sessions_router, prefix="/api", tags=["sessions"])
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],  # Angular
+    allow_credentials=True,
+    allow_methods=["*"],   # IMPORTANT
+    allow_headers=["*"],   # IMPORTANT
+)
+
+app.include_router(user_router, prefix="/api")
