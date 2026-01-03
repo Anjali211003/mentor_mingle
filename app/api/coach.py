@@ -43,22 +43,7 @@ def create_coach_profile(
     if existing_profile:
         raise HTTPException(status_code=400, detail="Coach profile already exists")
     
-    # Create new coach profile
-    new_profile = CoachProfile(
-        user_id=current_user.id,
-        bio=profile.bio,
-        expertise=profile.expertise,
-        location=profile.location,
-        availability=profile.availability,
-        image_url=profile.image_url
-    )
-    print(new_profile)
-    db.add(new_profile)
-    db.commit()
-    db.refresh(new_profile)
-
-    return new_profile
-
+    # Cr
 @router.put("/coach-profile", response_model=CoachProfileResponse)
 def update_coach_profile(
     profile: CoachProfileUpdate,

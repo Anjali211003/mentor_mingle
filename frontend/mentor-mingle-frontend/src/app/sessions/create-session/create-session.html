@@ -1,0 +1,24 @@
+<h2>Create Coaching Session</h2>
+
+<form [formGroup]="sessionForm" (ngSubmit)="submit()">
+
+  <label>Topic</label>
+  <input type="text" formControlName="topic">
+
+  <label>Location</label>
+  <input type="text" formControlName="location">
+
+  <label>Capacity</label>
+  <input type="number" formControlName="capacity">
+
+  <label>Date & Time</label>
+  <input type="datetime-local" formControlName="time">
+
+  <label>Coachee ID</label>
+  <input type="number" formControlName="coachee_id">
+
+  <button type="submit" [disabled]="sessionForm.invalid">
+    Create Session
+  </button>
+
+</form>

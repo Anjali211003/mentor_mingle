@@ -1,0 +1,32 @@
+<h2>Coach Profile</h2>
+<p *ngIf="!profileLoaded">Loading profile...</p>
+
+<form *ngIf="profileLoaded" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+
+  <label>Bio</label>
+  <textarea formControlName="bio"></textarea>
+
+  <label>Expertise</label>
+  <input type="text" formControlName="expertise" />
+
+  <label>Location</label>
+  <input type="text" formControlName="location" />
+
+  <label>Availability</label>
+  <select formControlName="availability">
+    <option value="available">Available</option>
+    <option value="unavailable">Unavailable</option>
+  </select>
+
+  <label>Image URL</label>
+  <input type="text" formControlName="image_url" />
+
+  <button type="submit">
+    {{ hasProfile ? 'Update Profile' : 'Save Profile' }}
+  </button>
+
+  <button *ngIf="hasProfile" type="button" (click)="deleteProfile()">
+    Delete Profile
+  </button>
+
+</form>
