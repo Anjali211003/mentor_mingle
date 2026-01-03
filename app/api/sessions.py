@@ -77,6 +77,24 @@ def update_session(
     db.refresh(existing_session)
 
     return existing_session
+@router.get("/sessions/my", response_model=list[SessionResponse])
+def get_my_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "coach":
+        raise HTTPException(
+            status_code=403,
+            detail="Only coaches can view their sessions"
+        )
+
+    sessions = (
+        db.query(SessionModel)
+        .filter(SessionModel.coach_id == current_user.id)
+        .all()
+    )
+
+    return sessions
 
 @router.get("/sessions/{session_id}", response_model=SessionResponse)
 def get_session(session_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

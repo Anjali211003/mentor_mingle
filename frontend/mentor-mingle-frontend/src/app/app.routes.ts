@@ -40,7 +40,9 @@ export const routes: Routes = [
     path: 'coachee-profile',
     component: CoacheeProfile,
     canActivate: [roleGuard('coachee')]
-  }
+  },
+  
+
 ];
 
 

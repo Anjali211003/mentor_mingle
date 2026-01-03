@@ -7,7 +7,6 @@ import {
   Validators
 } from '@angular/forms';
 import { Profile } from '../../services/profile';
-import { finalize } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -18,8 +17,10 @@ import { finalize } from 'rxjs/operators';
 export class CoachProfile implements OnInit {
 
   profileForm!: FormGroup;
-  profileLoaded = false;
-  hasProfile = false;
+
+  profileLoaded = false;   // loading state
+  hasProfile = false;      // profile exists or not
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -42,27 +43,23 @@ export class CoachProfile implements OnInit {
   }
 
   loadProfile() {
-    this.profileService.getCoachProfile()
-      .pipe(
-        finalize(() => {
-          // 🔥 THIS FIXES INFINITE LOADING
-          this.profileLoaded = true;
-        })
-      )
-      .subscribe({
-        next: (profile) => {
-          console.log('Profile loaded:', profile);
-          this.profileForm.patchValue(profile);
-          this.hasProfile = true;
-        },
-        error: (err) => {
-          if (err.status === 404) {
-            this.hasProfile = false;
-          } else {
-            console.error('Profile load error:', err);
-          }
+    this.profileService.getCoachProfile().subscribe({
+      next: (res) => {
+        this.profileForm.patchValue(res);
+        this.hasProfile = true;
+        this.profileLoaded = true;
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          // Coach has NO profile yet
+          this.hasProfile = false;
+        } else {
+          this.errorMessage = 'Failed to load profile';
         }
-      });
+
+        this.profileLoaded = true; // 🔑 STOP LOADING
+      }
+    });
   }
 
   saveProfile() {
@@ -70,11 +67,15 @@ export class CoachProfile implements OnInit {
 
     this.profileService.updateCoachProfile(this.profileForm.value).subscribe({
       next: () => {
-        alert(this.hasProfile ? 'Profile updated' : 'Profile created');
+        alert('Profile saved successfully');
         this.hasProfile = true;
       },
       error: (err) => {
-        alert(err.error?.detail || 'Failed to save profile');
+        if (err.status === 404) {
+          alert('Profile does not exist. Creation is not enabled.');
+        } else {
+          alert('Failed to save profile');
+        }
       }
     });
   }
@@ -85,12 +86,12 @@ export class CoachProfile implements OnInit {
     this.profileService.deleteCoachProfile().subscribe({
       next: () => {
         alert('Profile deleted');
-        this.profileForm.reset({ availability: 'available' });
+        this.profileForm.reset({
+          availability: 'available'
+        });
         this.hasProfile = false;
       },
-      error: (err) => {
-        alert(err.error?.detail || 'Failed to delete profile');
-      }
+      error: () => alert('Failed to delete profile')
     });
   }
 }

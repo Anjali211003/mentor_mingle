@@ -1,32 +1,42 @@
-<h2>Coach Profile</h2>
-<p *ngIf="!profileLoaded">Loading profile...</p>
+@if (!profileLoaded) {
+  <p>Loading profile...</p>
+}
 
-<form *ngIf="profileLoaded" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+@if (profileLoaded) {
 
-  <label>Bio</label>
-  <textarea formControlName="bio"></textarea>
+  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
 
-  <label>Expertise</label>
-  <input type="text" formControlName="expertise" />
+    <label>Bio</label>
+    <textarea formControlName="bio"></textarea>
 
-  <label>Location</label>
-  <input type="text" formControlName="location" />
+    <label>Expertise</label>
+    <input formControlName="expertise" />
 
-  <label>Availability</label>
-  <select formControlName="availability">
-    <option value="available">Available</option>
-    <option value="unavailable">Unavailable</option>
-  </select>
+    <label>Location</label>
+    <input formControlName="location" />
 
-  <label>Image URL</label>
-  <input type="text" formControlName="image_url" />
+    <label>Availability</label>
+    <select formControlName="availability">
+      <option value="available">Available</option>
+      <option value="unavailable">Unavailable</option>
+    </select>
 
-  <button type="submit">
-    {{ hasProfile ? 'Update Profile' : 'Save Profile' }}
-  </button>
+    <label>Image URL</label>
+    <input formControlName="image_url" />
 
-  <button *ngIf="hasProfile" type="button" (click)="deleteProfile()">
-    Delete Profile
-  </button>
+    <button type="submit">
+      {{ hasProfile ? 'Update Profile' : 'Save Profile' }}
+    </button>
 
-</form>
+  </form>
+
+  @if (hasProfile) {
+    <button type="button" (click)="deleteProfile()">
+      Delete Profile
+    </button>
+  }
+
+  @if (errorMessage) {
+    <p style="color:red">{{ errorMessage }}</p>
+  }
+}

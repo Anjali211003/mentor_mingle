@@ -1,12 +1,44 @@
 <h2>Coach Dashboard</h2>
 
-<a routerLink="/coach-profile"> Coach Profile</a>
-<br><br>
-
-
+<a routerLink="/coach-profile">Coach Profile</a>
+<br /><br />
 
 <button routerLink="/create-session">
   Create Session
 </button>
+
+<hr />
+
+<!-- LOADING -->
+@if (loading) {
+  <p>Loading sessions...</p>
+}
+
+<!-- ERROR -->
+@if (!loading && error) {
+  <p style="color:red">{{ error }}</p>
+}
+
+<!-- EMPTY STATE -->
+@if (!loading && sessions.length === 0) {
+  <p>No sessions created yet.</p>
+}
+
+<!-- SESSION LIST -->
+@if (!loading && sessions.length > 0) {
+  <h3>My Sessions</h3>
+
+  <ul>
+    @for (session of sessions; track session.id) {
+      <li>
+        <strong>{{ session.topic }}</strong> |
+        {{ session.location }} |
+        {{ session.status }}
+      </li>
+    }
+  </ul>
+}
+
+<br />
 
 <button (click)="logout()">Logout</button>
