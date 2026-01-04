@@ -1,5 +1,50 @@
-<h2>Coachee Dashboard</h2>
+<div class="dashboard-container">
 
-<a routerLink="/coachee-profile"> Coachee Profile</a>
-<br><br>
-<button (click)="logout()">Logout</button>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <h2>Coachee Dashboard</h2>
+
+    <div class="profile-menu">
+      <span class="profile-icon" (click)="goToProfile()">👤</span>
+      <span class="menu-icon" (click)="toggleMenu()">☰</span>
+
+      @if (showMenu) {
+        <div class="dropdown">
+          <button (click)="goToProfile()">Profile</button>
+          <button (click)="logout()">Logout</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  @if (loading) {
+    <p class="loading">Loading sessions...</p>
+  }
+
+  <!-- ERROR -->
+  @if (!loading && error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <!-- EMPTY -->
+  @if (!loading && sessions.length === 0) {
+    <p class="empty">No sessions requested yet.</p>
+  }
+
+  <!-- SESSION CARDS -->
+  @if (!loading && sessions.length > 0) {
+    <div class="sessions-grid">
+      @for (session of sessions; track session.id) {
+        <div class="session-card">
+          <h3>{{ session.topic }}</h3>
+          <p>📍 {{ session.location }}</p>
+          <p>🕒 {{ session.time | date:'medium' }}</p>
+          <span class="status {{ session.status }}">
+            {{ session.status | titlecase }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+</div>

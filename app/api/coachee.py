@@ -19,6 +19,25 @@ def get_db():
 # Dependency to get the current authenticated user
 def get_user_from_token(current_user: User = Depends(get_current_user)):
     return current_user
+@router.get("/coachee-profile", response_model=CoacheeProfileResponse)
+def get_coachee_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "coachee":
+        raise HTTPException(status_code=403, detail="Only coachees allowed")
+
+    profile = (
+        db.query(CoacheeProfile)  # ✅ SQLAlchemy model
+        .filter(CoacheeProfile.user_id == current_user.id)
+        .first()
+    )
+
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    return profile
+
 
 @router.post("/coachee-profile", response_model=CoacheeProfileResponse)
 def create_coachee_profile(

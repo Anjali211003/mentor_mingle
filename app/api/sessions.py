@@ -204,3 +204,18 @@ def get_session_status(
         raise HTTPException(status_code=404, detail="Session not found")
 
     return session
+@router.get("/sessions/requests/my", response_model=list[SessionResponse])
+def get_my_requested_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "coachee":
+        raise HTTPException(status_code=403, detail="Only coachees can view requested sessions")
+
+    sessions = (
+        db.query(SessionModel)
+        .filter(SessionModel.coachee_id == current_user.id)
+        .all()
+    )
+
+    return sessions

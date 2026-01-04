@@ -1,44 +1,80 @@
-<h2>Coach Dashboard</h2>
+<div class="dashboard-container">
 
-<a routerLink="/coach-profile">Coach Profile</a>
-<br /><br />
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title">
+      <h2>Coach Dashboard</h2>
+      <p>Welcome back 👋</p>
+    </div>
 
-<button routerLink="/create-session">
-  Create Session
-</button>
+    <!-- PROFILE + MENU -->
+    <div class="profile-area">
+      <div class="profile-icon" (click)="toggleMenu($event)">
+        👤
+        <span class="coach-name">{{ coachName }}</span>
+      </div>
 
-<hr />
+      @if (menuOpen) {
+        <div class="dropdown">
+          <button type="button" (click)="goProfile()">Profile</button>
+          <button type="button" (click)="goCreateSession()">Create Session</button>
+          <button type="button" (click)="logout()">Logout</button>
+        </div>
+      }
+    </div>
+  </div>
 
-<!-- LOADING -->
-@if (loading) {
-  <p>Loading sessions...</p>
-}
+  <!-- LOADING -->
+  @if (loading) {
+    <p class="center">Loading sessions...</p>
+  }
 
-<!-- ERROR -->
-@if (!loading && error) {
-  <p style="color:red">{{ error }}</p>
-}
+  <!-- ERROR -->
+  @if (!loading && error) {
+    <p class="error">{{ error }}</p>
+  }
 
-<!-- EMPTY STATE -->
-@if (!loading && sessions.length === 0) {
-  <p>No sessions created yet.</p>
-}
+  <!-- EMPTY -->
+  @if (!loading && sessions.length === 0) {
+    <p class="center">No sessions created yet.</p>
+  }
 
-<!-- SESSION LIST -->
+<!-- SESSION CARDS -->
 @if (!loading && sessions.length > 0) {
-  <h3>My Sessions</h3>
-
-  <ul>
+  <div class="sessions-grid">
     @for (session of sessions; track session.id) {
-      <li>
-        <strong>{{ session.topic }}</strong> |
-        {{ session.location }} |
-        {{ session.status }}
-      </li>
+      <div class="session-card">
+
+        <h3>{{ session.topic }}</h3>
+
+        <p>📍 {{ session.location }}</p>
+
+        <p>🕒 {{ session.time | date:'medium' }}</p>
+
+        <!-- STATUS WITH COLOR -->
+        <span class="status" [ngClass]="session.status">
+          {{ session.status | titlecase }}
+        </span>
+
+        <!-- ACTION BUTTONS -->
+        <div class="card-actions">
+            @if (session.status === 'requested') {
+    <button class="approve-btn" (click)="approve(session.id)">
+      ✅ Approve
+    </button>
+
+    <button class="reject-btn" (click)="reject(session.id)">
+      ❌ Reject
+    </button>
+  }
+
+          <button class="delete-btn" (click)="deleteSession(session.id)">
+            🗑 Delete
+          </button>
+        </div>
+
+      </div>
     }
-  </ul>
+  </div>
 }
 
-<br />
-
-<button (click)="logout()">Logout</button>
