@@ -1,27 +1,63 @@
-<h2>Coach Profile</h2>
+<div class="profile-wrapper">
 
-<form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+  <div class="profile-card">
 
-  <label>Bio</label>
-  <textarea formControlName="bio"></textarea>
+    <div class="profile-header">
+      <div class="avatar">👤</div>
+      <h2>Coach Profile</h2>
+      <!-- Change to Coachee Profile -->
+    </div>
 
-  <label>Expertise</label>
-  <input formControlName="expertise" />
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
 
-  <label>Location</label>
-  <input formControlName="location" />
+      <div class="field">
+        <label>Bio</label>
+        <textarea
+          formControlName="bio"
+          placeholder="Write something about yourself..."
+        ></textarea>
+      </div>
 
-  <label>Availability</label>
-  <select formControlName="availability">
-    <option value="available">Available</option>
-    <option value="unavailable">Unavailable</option>
-  </select>
+      <div class="field">
+        <label>Expertise</label>
+        <input
+          type="text"
+          formControlName="expertise"
+          placeholder="Your expertise"
+        />
+      </div>
 
-  <label>Image URL</label>
-  <input formControlName="image_url" />
+      <div class="field">
+        <label>Location</label>
+        <input
+          type="text"
+          formControlName="location"
+          placeholder="Your city / country"
+        />
+      </div>
 
-  <button type="submit">
-    {{ profileExists ? 'Update Profile' : 'Create Profile' }}
-  </button>
+      <div class="field">
+        <label>Availability</label>
+        <select formControlName="availability">
+          <option value="available">Available</option>
+          <option value="unavailable">Unavailable</option>
+        </select>
+      </div>
 
-</form>
+      <div class="field">
+        <label>Profile Image URL</label>
+        <input
+          type="text"
+          formControlName="image_url"
+          placeholder="https://image-link"
+        />
+      </div>
+
+      <button type="submit" class="save-btn">
+        {{ profileExists ? 'Update Profile' : 'Create Profile' }}
+      </button>
+
+    </form>
+  </div>
+
+</div>

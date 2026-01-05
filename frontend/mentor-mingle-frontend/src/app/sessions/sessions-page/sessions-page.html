@@ -1,0 +1,43 @@
+<div class="sessions-container">
+
+  <h2>Available Sessions</h2>
+
+  <!-- LOADING -->
+  @if (loading) {
+    <p class="loading">Loading sessions...</p>
+  }
+
+  <!-- ERROR -->
+  @if (!loading && error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <!-- EMPTY -->
+  @if (!loading && sessions.length === 0) {
+    <p class="empty">No sessions available.</p>
+  }
+
+  <!-- SESSIONS -->
+  @if (!loading && sessions.length > 0) {
+    <div class="sessions-grid">
+      @for (session of sessions; track session.id) {
+        <div class="session-card">
+
+          <h3>{{ session.topic }}</h3>
+          <p>📍 {{ session.location }}</p>
+          <p>🕒 {{ session.time | date:'medium' }}</p>
+
+          <!-- ONLY COACHEE CAN REQUEST -->
+          @if (isCoachee) {
+            <button class="request-btn"
+                    (click)="request(session.id)">
+              Request Session
+            </button>
+          }
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

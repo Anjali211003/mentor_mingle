@@ -13,7 +13,9 @@ export class CoachProfile implements OnInit {
 
   profileForm!: FormGroup;   // ✅ declare only
   profileExists = false;
-
+  darkMode = false;
+showToast = false;
+profileCompletion = 0;
   constructor(
     private fb: FormBuilder,
     private profileService: Profile
@@ -28,9 +30,9 @@ export class CoachProfile implements OnInit {
       availability: ['available', Validators.required],
       image_url: ['']
     });
-
+     
     // ✅ GET coachee profile
-    this.profileService.getCoacheeProfile().subscribe({
+    this.profileService.getCoachProfile().subscribe({
       next: (res) => {
         this.profileForm.patchValue(res);
         this.profileExists = true;
@@ -46,12 +48,12 @@ export class CoachProfile implements OnInit {
 
     // ✅ POST or PUT based on existence
     const apiCall = this.profileExists
-      ? this.profileService.updateCoacheeProfile(this.profileForm.value)
-      : this.profileService.createCoacheeProfile(this.profileForm.value);
+      ? this.profileService.updateCoachProfile(this.profileForm.value)
+      : this.profileService.createCoachProfile(this.profileForm.value);
 
     apiCall.subscribe({
       next: () => {
-        alert('Coachee profile saved successfully');
+        alert('Coach profile saved successfully');
         this.profileExists = true;
       },
       error: () => {

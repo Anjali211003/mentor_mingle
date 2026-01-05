@@ -53,6 +53,10 @@ export class CoachDashboard implements OnInit {
       }
     });
   }
+  goSessions() {
+  this.menuOpen = false;
+  this.router.navigate(['/sessions']);
+}
 
   toggleMenu(event: Event): void {
     event.stopPropagation();

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-
+import { Session } from '../models/session.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +13,7 @@ export class SessionService {
   constructor(private http: HttpClient) {}
 
  
-getMyRequestedSessions() {
-  return this.http.get<any[]>(
-    `${this.apiUrl}/sessions/requests/my`
-  );
-}
+
 
   getMySessions() {
     return this.http.get<any[]>(`${this.apiUrl}/sessions/my`);
@@ -37,6 +33,22 @@ getMyRequestedSessions() {
     {}
   );
 }
+getAllSessions() {
+  return this.http.get<Session[]>(`${this.apiUrl}/sessions`);
+}
+
+getMyRequestedSessions() {
+  return this.http.get<Session[]>(`${this.apiUrl}/sessions/requests/my`);
+}
+
+requestSession(sessionId: number) {
+    return this.http.post(
+      `${this.apiUrl}/session-requests`,
+      null,
+      { params: { session_id: sessionId } }
+    );
+  }
+
 
 rejectSession(sessionId: number) {
   return this.http.post(

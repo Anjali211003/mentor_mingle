@@ -45,6 +45,20 @@ def create_session(
     db.refresh(new_session)
 
     return new_session
+@router.get("/sessions", response_model=list[SessionResponse])
+def get_all_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Both coach & coachee can view sessions
+    if current_user.role not in ["coach", "coachee"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to view sessions"
+        )
+
+    sessions = db.query(SessionModel).all()
+    return sessions
 
 @router.put("/sessions/{session_id}", response_model=SessionResponse)
 def update_session(
@@ -120,27 +134,25 @@ def delete_session(session_id: int, db: Session = Depends(get_db), current_user:
     db.commit()
 
     return {"message": "Session deleted successfully"}
-
-@router.post("/session-requests", response_model=SessionResponse)
+@router.post("/session-requests/{session_id}", response_model=SessionResponse)
 def request_session(
-    session_id: int, 
-    db: Session = Depends(get_db), 
+    session_id: int,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_user_from_token)
 ):
     if current_user.role != "coachee":
         raise HTTPException(status_code=403, detail="Only coachees can request sessions")
 
-    # Find the session
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Update the session status to 'requested'
     session.status = "requested"
     db.commit()
     db.refresh(session)
 
     return session
+
 
 # 2. Approve session request (by coach)
 @router.post("/session-requests/{session_id}/approve", response_model=SessionResponse)

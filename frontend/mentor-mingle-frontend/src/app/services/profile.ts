@@ -21,7 +21,10 @@ export class Profile {
   updateCoachProfile(data: any): Observable<any> {
     return this.http.put<any>(`${this.api}/coach-profile`, data);
   }
-
+   
+  createCoachProfile(data: any): Observable<any> {
+    return this.http.post(`${this.api}/coach-profile`, data);
+  }
   // Delete coach profile
   deleteCoachProfile(): Observable<any> {
     return this.http.delete<any>(`${this.api}/coach-profile`);

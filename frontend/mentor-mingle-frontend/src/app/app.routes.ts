@@ -8,6 +8,7 @@ import { roleGuard } from './guards/auth.guard';
 import { CreateSession } from './sessions/create-session/create-session';
 import { CoachProfile } from './profile/coach-profile/coach-profile';
 import { CoacheeProfile } from './profile/coachee-profile/coachee-profile';
+import { SessionsPage } from './sessions/sessions-page/sessions-page';
 
 
 export const routes: Routes = [
@@ -41,7 +42,11 @@ export const routes: Routes = [
     component: CoacheeProfile,
     canActivate: [roleGuard('coachee')]
   },
-  
+  {
+  path: 'sessions',
+  component: SessionsPage
+}
+
 
 ];
 
