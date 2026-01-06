@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +14,19 @@ export class Auth {
 
   // ---------------- API CALLS ----------------
 
-  login(data: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, data);
-  }
+  login(credentials: any) {
+  return this.http.post<any>(`${this.apiUrl}/login`, credentials)
+    .pipe(
+      tap((res) => {
+        // 🔥 STORE TOKEN
+        localStorage.setItem('token', res.access_token);
+
+        // 🔥 STORE USER (THIS WAS MISSING)
+        localStorage.setItem('users', JSON.stringify(res.user));
+      })
+    );
+}
+
 
   register(data: {
     email: string;
@@ -52,6 +62,14 @@ export class Auth {
   getRole(): string | null {
     return this.getUser()?.role ?? null;
   }
+  getCurrentUser() {
+  const stored =
+    localStorage.getItem('users') ||
+    localStorage.getItem('user') ||
+    localStorage.getItem('currentUser');
+
+  return stored ? JSON.parse(stored) : null;
+}
 
   // ---------------- AUTH STATE ----------------
 

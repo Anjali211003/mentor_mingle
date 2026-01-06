@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SessionService } from '../../services/session';
 import { Auth } from '../../services/auth';
+import { Session } from '../../models/session.model';
 
 @Component({
   selector: 'app-sessions-page',
@@ -12,7 +13,7 @@ import { Auth } from '../../services/auth';
 })
 export class SessionsPage implements OnInit {
 
-  sessions: any[] = [];
+  sessions: Session[] = [];
   loading = true;
   error = '';
 
@@ -25,23 +26,25 @@ export class SessionsPage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.detectRole();
-    this.loadSessions();
-  }
+    this.setRole();        // 🔥 FIX
+    this.loadSessions();   // 🔥 FIX
+    
 
-  detectRole(): void {
-    // 🔥 SAFE ROLE DETECTION
-    const stored =
-      localStorage.getItem('users') ||
-      localStorage.getItem('user') ||
-      localStorage.getItem('currentUser');
 
-    if (stored) {
-      const user = JSON.parse(stored);
-      this.isCoachee = user?.role === 'coachee';
-    }
+  const user = JSON.parse(localStorage.getItem('users') || '{}');
+  this.isCoachee = user.role === 'coachee';
+}
 
-    console.log('Is Coachee:', this.isCoachee); // ✅ DEBUG
+  
+
+  setRole(): void {
+    const user = this.authService.getCurrentUser();
+
+    console.log('Logged user:', user);   // 🔍 DEBUG
+
+    this.isCoachee = user?.role === 'coachee';
+
+    console.log('Is coachee:', this.isCoachee); // 🔍 DEBUG
   }
 
   loadSessions(): void {
@@ -51,20 +54,44 @@ export class SessionsPage implements OnInit {
       next: (res) => {
         this.sessions = res || [];
         this.loading = false;
-        this.cdr.detectChanges();   // 🔥 FIX
+        this.cdr.detectChanges(); // 🔥 IMPORTANT
       },
       error: () => {
         this.error = 'Failed to load sessions';
         this.loading = false;
-        this.cdr.detectChanges();   // 🔥 FIX
+        this.cdr.detectChanges();
       }
     });
   }
 
-  request(sessionId: number): void {
-    this.sessionService.requestSession(sessionId).subscribe({
-      next: () => alert('Session requested'),
-      error: () => alert('Failed to request session')
-    });
-  }
+  
+request(sessionId: number): void {
+  this.sessionService.requestSession(sessionId).subscribe({
+    next: (updatedSession: Session) => {
+      this.sessions = this.sessions.map(s =>
+        s.id === updatedSession.id ? updatedSession : s
+      );
+      alert('Session requested successfully');
+    },
+    error: (err) => {
+      alert(err?.error?.detail || 'Failed to request session');
+    }
+  });
+}
+
+
+loadMyRequestedSessions(): void {
+  this.loading = true;
+
+  this.sessionService.getMyRequestedSessions().subscribe({
+    next: (res) => {
+      this.sessions = res || [];
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+}
+
 }

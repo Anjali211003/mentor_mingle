@@ -28,12 +28,7 @@
           <p>🕒 {{ session.time | date:'medium' }}</p>
 
           <!-- ONLY COACHEE CAN REQUEST -->
-          @if (isCoachee) {
-            <button class="request-btn"
-                    (click)="request(session.id)">
-              Request Session
-            </button>
-          }
+   
 
         </div>
       }

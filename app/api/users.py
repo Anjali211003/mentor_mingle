@@ -92,7 +92,18 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     )
     refresh_token = create_refresh_token(data={"sub": db_user.email})
 
-    return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "refresh_token": refresh_token,
+        "user": {
+            "id": db_user.id,
+            "name": db_user.name,
+            "email": db_user.email,
+            "phone": db_user.phone,
+            "role": db_user.role
+        }
+    }
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str  # Expect the refresh_token in the request body
