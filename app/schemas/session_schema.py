@@ -39,3 +39,4 @@ class SessionResponse(SessionBase):
 
     class Config:
         orm_mode = True  # To convert SQLAlchemy models to Pydantic models
+

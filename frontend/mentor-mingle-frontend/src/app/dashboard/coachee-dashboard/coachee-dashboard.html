@@ -6,6 +6,7 @@
 
     <div class="profile-menu">
       <span class="profile-icon" (click)="goToProfile()">👤</span>
+      <span class="coach-name">{{ coacheeName }}</span>
       <span class="menu-icon" (click)="toggleMenu()">☰</span>
 
       @if (showMenu) {

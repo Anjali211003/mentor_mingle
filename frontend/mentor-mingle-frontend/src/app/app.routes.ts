@@ -9,6 +9,7 @@ import { CreateSession } from './sessions/create-session/create-session';
 import { CoachProfile } from './profile/coach-profile/coach-profile';
 import { CoacheeProfile } from './profile/coachee-profile/coachee-profile';
 import { SessionsPage } from './sessions/sessions-page/sessions-page';
+import { RequestedSessions } from './sessions/requested-sessions/requested-sessions';
 
 
 export const routes: Routes = [
@@ -45,8 +46,12 @@ export const routes: Routes = [
   {
   path: 'sessions',
   component: SessionsPage
-}
+},
 
+{
+  path: 'coach/requested-sessions',
+  component: RequestedSessions
+}
 
 ];
 

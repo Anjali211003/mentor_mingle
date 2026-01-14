@@ -5,7 +5,8 @@ from app.models.sessions import Session as SessionModel
 from app.schemas.session_schema import SessionCreate, SessionUpdate, SessionResponse
 from app.models.users import User
 from app.core.auth import get_current_user
-
+from app.models.SessionRequest import SessionRequest
+from app.schemas.session_request import SessionRequestCreate,SessionRequestResponse
 router = APIRouter()
 
 # Dependency to get the DB session
@@ -109,6 +110,24 @@ def get_my_sessions(
     )
 
     return sessions
+@router.get("/sessions/requests/my", response_model=list[SessionResponse])
+def get_my_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "coachee":
+        raise HTTPException(
+            status_code=403,
+            detail="Only coachees can view their sessions"
+        )
+
+    sessions = (
+        db.query(SessionModel)
+        .filter(SessionModel.coachee_id == current_user.id)
+        .all()
+    )
+
+    return sessions
 
 @router.get("/sessions/{session_id}", response_model=SessionResponse)
 def get_session(session_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -134,100 +153,93 @@ def delete_session(session_id: int, db: Session = Depends(get_db), current_user:
     db.commit()
 
     return {"message": "Session deleted successfully"}
-@router.post("/session-requests/{session_id}", response_model=SessionResponse)
-def request_session(
-    session_id: int,
+@router.post("/session-requests")
+def create_session_request(
+    request: SessionRequestCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_user_from_token)
 ):
     if current_user.role != "coachee":
-        raise HTTPException(status_code=403, detail="Only coachees can request sessions")
+        raise HTTPException(403, "Only coachees can request sessions")
 
-    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session.status = "requested"
-    db.commit()
-    db.refresh(session)
-
-    return session
-
-
-# 2. Approve session request (by coach)
-@router.post("/session-requests/{session_id}/approve", response_model=SessionResponse)
-def approve_session(
-    session_id: int, 
-    db: Session = Depends(get_db), 
-    current_user: User = Depends(get_user_from_token)
-):
-    if current_user.role != "coach":
-        raise HTTPException(status_code=403, detail="Only coaches can approve sessions")
-
-    # Find the session
-    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    if session.status != "requested":
-        raise HTTPException(status_code=400, detail="Session is not in 'requested' status")
-
-    # Approve the session
-    session.status = "approved"
-    db.commit()
-    db.refresh(session)
-
-    return session
-
-# 3. Reject session request (by coach)
-@router.post("/session-requests/{session_id}/reject", response_model=SessionResponse)
-def reject_session(
-    session_id: int, 
-    db: Session = Depends(get_db), 
-    current_user: User = Depends(get_user_from_token)
-):
-    if current_user.role != "coach":
-        raise HTTPException(status_code=403, detail="Only coaches can reject sessions")
-
-    # Find the session
-    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    if session.status != "requested":
-        raise HTTPException(status_code=400, detail="Session is not in 'requested' status")
-
-    # Reject the session
-    session.status = "rejected"
-    db.commit()
-    db.refresh(session)
-
-    return session
-
-# 4. Get session status
-@router.get("/session-requests/{session_id}/status", response_model=SessionResponse)
-def get_session_status(
-    session_id: int, 
-    db: Session = Depends(get_db),
-):
-    # Find the session
-    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    return session
-@router.get("/sessions/requests/my", response_model=list[SessionResponse])
-def get_my_requested_sessions(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    if current_user.role != "coachee":
-        raise HTTPException(status_code=403, detail="Only coachees can view requested sessions")
-
-    sessions = (
-        db.query(SessionModel)
-        .filter(SessionModel.coachee_id == current_user.id)
-        .all()
+    new_request = SessionRequest(
+        coachee_id=current_user.id,
+        coach_id=request.coach_id,
+        topic=request.topic,
+        preferred_time=request.preferred_time,
+        message=request.message
     )
 
-    return sessions
+    db.add(new_request)
+    db.commit()
+    db.refresh(new_request)
+    return new_request
+
+
+@router.get("/session-requests/coach")
+def get_requests_for_coach(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_user_from_token)
+):
+    if current_user.role != "coach":
+        raise HTTPException(403, "Only coaches allowed")
+
+    return db.query(SessionRequest)\
+        .filter(SessionRequest.coach_id == current_user.id)\
+        .all()
+
+@router.post("/session-requests/{request_id}/approve")
+def approve_request_and_create_session(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_user_from_token)
+):
+    if current_user.role != "coach":
+        raise HTTPException(403)
+
+    req = db.query(SessionRequest).filter_by(id=request_id).first()
+    if not req:
+        raise HTTPException(404)
+
+    # create actual session
+    session = SessionModel(
+        coach_id=req.coach_id,
+        coachee_id=req.coachee_id,
+        topic=req.topic,
+        time=req.preferred_time,
+        status="approved"
+    )
+
+    req.status = "approved"
+
+    db.add(session)
+    db.commit()
+    return session
+
+@router.post("/session-requests/{request_id}/reject")
+def approve_request_and_create_session(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_user_from_token)
+):
+    if current_user.role != "coach":
+        raise HTTPException(403)
+
+    req = db.query(SessionRequest).filter_by(id=request_id).first()
+    if not req:
+        raise HTTPException(404)
+
+    # create actual session
+    session = SessionModel(
+        coach_id=req.coach_id,
+        coachee_id=req.coachee_id,
+        topic=req.topic,
+        time=req.preferred_time,
+        status="rejected"
+    )
+
+    req.status = "rejected"
+
+    db.add(session)
+    db.commit()
+    return session

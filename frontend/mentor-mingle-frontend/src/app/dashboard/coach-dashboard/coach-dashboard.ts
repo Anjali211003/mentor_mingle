@@ -72,6 +72,10 @@ export class CoachDashboard implements OnInit {
     this.menuOpen = false;
     this.router.navigate(['/create-session']);
   }
+  goRequestedSessions() {
+  this.router.navigate(['/coach/requested-sessions']);
+  this.menuOpen = false;
+}
 
   logout(): void {
     this.menuOpen = false;

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Session } from '../models/session.model';
 import { Observable } from 'rxjs';
+import { SessionRequest } from '../models/session-requests.model';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,12 @@ requestSession(sessionId: number): Observable<Session> {
   );
 }
 
+// session.service.ts
+getRequestedSessionsForCoach() {
+  return this.http.get<SessionRequest[]>(
+    '/api/session-requests/coach'
+  );
+}
 
 
 

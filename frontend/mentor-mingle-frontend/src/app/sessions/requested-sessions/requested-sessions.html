@@ -1,0 +1,16 @@
+<h2>Requested Sessions</h2>
+
+@if (loading) {
+  <p>Loading...</p>
+}
+
+@if (!loading && requests.length === 0) {
+  <p>No session requests yet.</p>
+}
+
+<div class="request-card" *ngFor="let req of requests">
+  <p><b>Coachee ID:</b> {{ req.coachee_id }}</p>
+  <p><b>Message:</b> {{ req.message }}</p>
+  <p><b>Status:</b> {{ req.status }}</p>
+  <p><b>Requested On:</b> {{ req.created_at | date:'medium' }}</p>
+</div>
